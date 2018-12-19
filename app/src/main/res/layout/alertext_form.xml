@@ -7,6 +7,17 @@
         android:layout_marginRight="10dp"
         android:id="@+id/etName"
         android:hint="请输入标记名称"
+        android:maxLength="20"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+    <EditText
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:id="@+id/etContent"
+        android:hint="请输入标记内容"
+        android:minLines="6"
+        android:maxLines="8"
+        android:maxLength="500"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

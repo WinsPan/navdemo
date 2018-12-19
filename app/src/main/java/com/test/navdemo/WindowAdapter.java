@@ -13,6 +13,11 @@ import com.amap.api.maps.model.Poi;
 import com.amap.api.navi.AmapNaviPage;
 import com.amap.api.navi.AmapNaviParams;
 import com.amap.api.navi.AmapNaviType;
+import com.litesuits.orm.db.assit.QueryBuilder;
+import com.test.navdemo.orm.MarketBean;
+import com.test.navdemo.util.ORMUtil;
+
+import java.util.ArrayList;
 
 public class WindowAdapter implements AMap.InfoWindowAdapter, AMap.OnMarkerClickListener,
         AMap.OnInfoWindowClickListener {
@@ -26,21 +31,29 @@ public class WindowAdapter implements AMap.InfoWindowAdapter, AMap.OnMarkerClick
 
     @Override
     public View getInfoWindow(Marker marker) {
+        if (marker == null || "".equals(marker.getTitle()) || marker.getTitle() == null) {
+            return null;
+        }
+        String name = marker.getTitle();
+        ArrayList<MarketBean> query = ORMUtil.getLiteOrm(context).query(new QueryBuilder<MarketBean>(MarketBean.class)
+                .whereEquals("address", name).whereAppendOr().whereEquals("address", marker.getSnippet())
+        );
+        if (query == null || query.size() < 1) {
+            return null;
+        }
         //关联布局
         View view = LayoutInflater.from(context).inflate(R.layout.layout_info_item, null);
         //标题
         TextView title = (TextView) view.findViewById(R.id.info_title);
-        //地址信息
-        TextView address = (TextView) view.findViewById(R.id.info_address);
         //纬度
         TextView latitude = (TextView) view.findViewById(R.id.info_latitude);
         //经度
         TextView longitude = (TextView) view.findViewById(R.id.info_longitude);
 
         title.setText(marker.getTitle());
-        address.setText(marker.getSnippet());
-        latitude.setText(marker.getPosition().latitude + "");
-        longitude.setText(marker.getPosition().longitude + "");
+//        marker.getPosition().latitude, marker.getPosition().longitude
+        latitude.setText(query.get(0).getLatitude() + "");
+        longitude.setText(query.get(0).getLongitude() + "");
         Log.e(TAG, "getInfoWindow1: " + marker.getTitle());
         Log.e(TAG, "getInfoWindow: " + marker.getSnippet());
         Log.e(TAG, "getInfoWindow: " + marker.getPosition().latitude);
