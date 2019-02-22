@@ -12,18 +12,18 @@
         android:background="@color/white"
         android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/button"
-            android:layout_width="260dp"
-            android:layout_height="48dp"
-            android:layout_gravity="left|center"
-            android:layout_marginLeft="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_weight="1"
-            android:background="@drawable/button_color"
-            android:text="标记"
-            android:visibility="visible" />
+        <!--<Button-->
+            <!--android:id="@+id/button"-->
+            <!--android:layout_width="260dp"-->
+            <!--android:layout_height="48dp"-->
+            <!--android:layout_gravity="left|center"-->
+            <!--android:layout_marginLeft="10dp"-->
+            <!--android:layout_marginTop="10dp"-->
+            <!--android:layout_marginBottom="10dp"-->
+            <!--android:layout_weight="1"-->
+            <!--android:background="@drawable/button_color"-->
+            <!--android:text="标记"-->
+            <!--android:visibility="visible" />-->
 
         <TextView
             android:layout_width="match_parent"
@@ -45,7 +45,7 @@
             android:layout_marginBottom="10dp"
             android:layout_weight="1"
             android:background="@drawable/button_color"
-            android:text="历史标记"
+            android:text="变电站列表"
             android:textAlignment="center"
             android:visibility="visible" />
     </LinearLayout>

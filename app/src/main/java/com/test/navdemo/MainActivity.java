@@ -92,8 +92,8 @@ public class MainActivity extends Activity implements View.OnClickListener, AMap
         //在activity执行onCreate时执行mMapView.onCreate(savedInstanceState)，创建地图
         mMapView.onCreate(savedInstanceState);
         requestPermission();
-        flagBtn = (Button) findViewById(R.id.button);
-        flagBtn.setOnClickListener(this);
+//        flagBtn = (Button) findViewById(R.id.button);
+//        flagBtn.setOnClickListener(this);
         listBtn = (Button) findViewById(R.id.signlist);
         listBtn.setOnClickListener(this);
 
@@ -155,37 +155,37 @@ public class MainActivity extends Activity implements View.OnClickListener, AMap
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.button:
-                ArrayList<MarketBean> query = ORMUtil.getLiteOrm(MainActivity.this).query(MarketBean.class);
-                if (query.size() > 9) {
-                    ToastUtil.show(MainActivity.this, "标记最多10条");
-                    return;
-                }
-                imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                //拓展窗口
-                mAlertViewExt = new AlertView("提示", "请输入标记信息！", "取消", null, new String[]{"完成"}, this, AlertView.Style.Alert, this);
-                ViewGroup extView = (ViewGroup) LayoutInflater.from(this).inflate(R.layout.alertext_form, null);
-                etName = (EditText) extView.findViewById(R.id.etName);
-                etName.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-                    @Override
-                    public void onFocusChange(View view, boolean focus) {
-                        //输入框出来则往上移动
-                        boolean isOpen = imm.isActive();
-                        mAlertViewExt.setMarginBottom(isOpen && focus ? 120 : 0);
-                    }
-                });
-                etContent = (EditText) extView.findViewById(R.id.etContent);
-                etContent.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-                    @Override
-                    public void onFocusChange(View view, boolean focus) {
-                        //输入框出来则往上移动
-                        boolean isOpen = imm.isActive();
-                        mAlertViewExt.setMarginBottom(isOpen && focus ? 120 : 0);
-                    }
-                });
-                mAlertViewExt.addExtView(extView);
-                mAlertViewExt.show();
-                break;
+//            case R.id.button:
+//                ArrayList<MarketBean> query = ORMUtil.getLiteOrm(MainActivity.this).query(MarketBean.class);
+//                if (query.size() > 9) {
+//                    ToastUtil.show(MainActivity.this, "标记最多10条");
+//                    return;
+//                }
+//                imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+//                //拓展窗口
+//                mAlertViewExt = new AlertView("提示", "请输入标记信息！", "取消", null, new String[]{"完成"}, this, AlertView.Style.Alert, this);
+//                ViewGroup extView = (ViewGroup) LayoutInflater.from(this).inflate(R.layout.alertext_form, null);
+//                etName = (EditText) extView.findViewById(R.id.etName);
+//                etName.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+//                    @Override
+//                    public void onFocusChange(View view, boolean focus) {
+//                        //输入框出来则往上移动
+//                        boolean isOpen = imm.isActive();
+//                        mAlertViewExt.setMarginBottom(isOpen && focus ? 120 : 0);
+//                    }
+//                });
+//                etContent = (EditText) extView.findViewById(R.id.etContent);
+//                etContent.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+//                    @Override
+//                    public void onFocusChange(View view, boolean focus) {
+//                        //输入框出来则往上移动
+//                        boolean isOpen = imm.isActive();
+//                        mAlertViewExt.setMarginBottom(isOpen && focus ? 120 : 0);
+//                    }
+//                });
+//                mAlertViewExt.addExtView(extView);
+//                mAlertViewExt.show();
+//                break;
             case R.id.signlist:
                 startActivity(new Intent(MainActivity.this, ListViewDelActivity.class));
                 break;
@@ -381,6 +381,32 @@ public class MainActivity extends Activity implements View.OnClickListener, AMap
     public void initMark() {
         ArrayList<MarketBean> marketBeans = ORMUtil.getLiteOrm(MainActivity.this).query(new QueryBuilder<MarketBean>(MarketBean.class)
                 .appendOrderDescBy("createTime"));
+        if(marketBeans.size() == 0){
+            String[][] dataList = new String[][]{{"崇文沈徐站","","金沙湾绿地和苑小区大门向西60米左右","31.318028700087","121.265974392361"},
+                    {"盘古终端站","","盘古天地停车场PA口入右拐-91267盘古终端站","31.339131401910","121.247095269097"},
+                    {"育苑环二号站","","沪宜公路育苑小区1866弄141号右前方一74480育宛环二号站","31.320922037760","121.294864637586"},
+                    {"瑞立商业六号中间站","","安驰路安悦路东地下停车场瑞立万立城汽车公馆-92210瑞立商业六号中间站地下停车场C区C008号停车位旁","31.382525000000","121.181434000000"},
+                    {"泽普环一号站","","墨玉路泽普路交叉路口一泽普环一号站74455","31.291440972222","121.162992078993"},
+                    {"阜康西中间站","","阜康西路墨玉路一秦震舒庭小区对面91569阜康西路中间站","31.298495822483","121.162419162326"},
+                    {"锦华五号站","","锦江茗园靖远路799弄41号正前方-94855锦华五号站","31.253284776476","121.331856282552"},
+                    {"沙河环一号站","","金沙江西路沙河路交叉口南侧60米东面广告牌后一74502沙河路一号站","31.239212510851","121.332427300347"},
+                    {"澄浏环一号","","澄浏路胜竹路交叉路向北200米北口74607澄浏环一号","31.407358940972","121.273428276909"},
+                    {"亭茗中心站","","绿洲华庭茗苑大门左侧一亭茗中心站-未编号","31.466056043837","121.244085286458"}};
+
+            for(String[] data : dataList) {
+                MarketBean marketBean = new MarketBean();
+                marketBean.setLatitude(Double.valueOf(data[3]));
+                marketBean.setLongitude(Double.valueOf(data[4]));
+
+                marketBean.setTitle(data[0]);
+                marketBean.setAddress(data[0]);
+                marketBean.setContent(data[2]);
+                marketBean.setCreateTime(new Date());
+                ORMUtil.getLiteOrm(MainActivity.this).save(marketBean);
+                marketBeans.add(marketBean);
+            }
+        }
+
         for (MarketBean marketBean : marketBeans) {
             aMap.addMarker(new MarkerOptions()
                     .position(new LatLng(marketBean.getLatitude(),//设置纬度
