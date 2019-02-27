@@ -1,7 +1,6 @@
 package com.test.navdemo;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -10,9 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.BounceInterpolator;
@@ -46,9 +43,8 @@ import com.test.navdemo.list.ListViewDelActivity;
 import com.test.navdemo.nav.WalkRouteCalculateActivity;
 import com.test.navdemo.orm.MarketBean;
 import com.test.navdemo.util.ORMUtil;
-import com.test.navdemo.util.ToastUtil;
 import com.yanzhenjie.permission.AndPermission;
-import com.yanzhenjie.permission.Permission;
+import com.yanzhenjie.permission.runtime.Permission;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -77,6 +73,8 @@ public class MainActivity extends Activity implements View.OnClickListener, AMap
     private LinearLayout bottomMain;
     private LinearLayout bottomNav;
     private MyLocationStyle myLocationStyle;
+    private final int LOCATION = 0x10001;
+    private final int SDCARD = 0x10002;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,7 +89,7 @@ public class MainActivity extends Activity implements View.OnClickListener, AMap
         mMapView = (MapView) findViewById(R.id.map);
         //在activity执行onCreate时执行mMapView.onCreate(savedInstanceState)，创建地图
         mMapView.onCreate(savedInstanceState);
-        requestPermission();
+        requestPermission(LOCATION);
 //        flagBtn = (Button) findViewById(R.id.button);
 //        flagBtn.setOnClickListener(this);
         listBtn = (Button) findViewById(R.id.signlist);
@@ -117,19 +115,38 @@ public class MainActivity extends Activity implements View.OnClickListener, AMap
         super.onStop();
     }
 
-    public void requestPermission() {
-        AndPermission.with(this)
-                .runtime()
-                .permission(new String[]{Permission.ACCESS_COARSE_LOCATION, Permission.ACCESS_FINE_LOCATION, Permission.WRITE_EXTERNAL_STORAGE})
-                .onGranted(permissions -> {
-                    initMap();
-                    // Storage permission are allowed.
-                })
-                .onDenied(permissions -> {
-                    // Storage permission are not allowed.
-                    Toast.makeText(MainActivity.this, "请先开启定位权限", Toast.LENGTH_LONG);
-                })
-                .start();
+    public void requestPermission(int permissionType) {
+        switch (permissionType) {
+            case LOCATION:
+                AndPermission.with(this)
+                        .runtime()
+                        .permission(Permission.Group.LOCATION)
+                        .onGranted(permissions -> {
+                            initMap();
+                            // Storage permission are allowed.
+                        })
+                        .onDenied(permissions -> {
+                            // Storage permission are not allowed.
+                            Toast.makeText(MainActivity.this, "请先开启定位权限", Toast.LENGTH_LONG).show();
+                        })
+                        .start();
+                break;
+            case SDCARD:
+                AndPermission.with(this)
+                        .runtime()
+                        .permission(Permission.Group.STORAGE)
+                        .onGranted(permissions -> {
+                            // Storage permission are allowed.
+                        })
+                        .onDenied(permissions -> {
+                            // Storage permission are not allowed.
+                            Toast.makeText(MainActivity.this, "请先开启读写权限", Toast.LENGTH_LONG).show();
+                        })
+                        .start();
+                break;
+            default:
+                break;
+        }
     }
 
     public void initMap() {
@@ -137,6 +154,7 @@ public class MainActivity extends Activity implements View.OnClickListener, AMap
             aMap = mMapView.getMap();
             mUiSettings = aMap.getUiSettings();
         }
+        requestPermission(SDCARD);
         aMap.moveCamera(CameraUpdateFactory.zoomTo(17));
         myLocationStyle = new MyLocationStyle();//初始化定位蓝点样式类myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE);//连续定位、且将视角移动到地图中心点，定位点依照设备方向旋转，并且会跟随设备移动。（1秒1次定位）如果不设置myLocationType，默认也会执行此种模式。
         myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE);
@@ -220,11 +238,11 @@ public class MainActivity extends Activity implements View.OnClickListener, AMap
             aMap.clear();
         }
         mMapView.onResume();
-        initMark();
         if (bottomMain.getVisibility() == View.VISIBLE) {
             bottomMain.setVisibility(View.GONE);
             bottomNav.setVisibility(View.GONE);
         }
+        initMark();
     }
 
     @Override
@@ -379,21 +397,25 @@ public class MainActivity extends Activity implements View.OnClickListener, AMap
     };
 
     public void initMark() {
+        if (!AndPermission.hasPermissions(this, Permission.Group.STORAGE)) {
+            Toast.makeText(MainActivity.this, "请先开启读写权限", Toast.LENGTH_LONG).show();
+            return;
+        }
         ArrayList<MarketBean> marketBeans = ORMUtil.getLiteOrm(MainActivity.this).query(new QueryBuilder<MarketBean>(MarketBean.class)
                 .appendOrderDescBy("createTime"));
-        if(marketBeans.size() == 0){
-            String[][] dataList = new String[][]{{"崇文沈徐站","","金沙湾绿地和苑小区大门向西60米左右","31.318028700087","121.265974392361"},
-                    {"盘古终端站","","盘古天地停车场PA口入右拐-91267盘古终端站","31.339131401910","121.247095269097"},
-                    {"育苑环二号站","","沪宜公路育苑小区1866弄141号右前方一74480育宛环二号站","31.320922037760","121.294864637586"},
-                    {"瑞立商业六号中间站","","安驰路安悦路东地下停车场瑞立万立城汽车公馆-92210瑞立商业六号中间站地下停车场C区C008号停车位旁","31.382525000000","121.181434000000"},
-                    {"泽普环一号站","","墨玉路泽普路交叉路口一泽普环一号站74455","31.291440972222","121.162992078993"},
-                    {"阜康西中间站","","阜康西路墨玉路一秦震舒庭小区对面91569阜康西路中间站","31.298495822483","121.162419162326"},
-                    {"锦华五号站","","锦江茗园靖远路799弄41号正前方-94855锦华五号站","31.253284776476","121.331856282552"},
-                    {"沙河环一号站","","金沙江西路沙河路交叉口南侧60米东面广告牌后一74502沙河路一号站","31.239212510851","121.332427300347"},
-                    {"澄浏环一号","","澄浏路胜竹路交叉路向北200米北口74607澄浏环一号","31.407358940972","121.273428276909"},
-                    {"亭茗中心站","","绿洲华庭茗苑大门左侧一亭茗中心站-未编号","31.466056043837","121.244085286458"}};
+        if (marketBeans.size() == 0) {
+            String[][] dataList = new String[][]{{"崇文沈徐站", "", "金沙湾绿地和苑小区大门向西60米左右", "31.318028700087", "121.265974392361"},
+                    {"盘古终端站", "", "盘古天地停车场PA口入右拐-91267盘古终端站", "31.339131401910", "121.247095269097"},
+                    {"育苑环二号站", "", "沪宜公路育苑小区1866弄141号右前方一74480育宛环二号站", "31.320922037760", "121.294864637586"},
+                    {"瑞立商业六号中间站", "", "安驰路安悦路东地下停车场瑞立万立城汽车公馆-92210瑞立商业六号中间站地下停车场C区C008号停车位旁", "31.382525000000", "121.181434000000"},
+                    {"泽普环一号站", "", "墨玉路泽普路交叉路口一泽普环一号站74455", "31.291440972222", "121.162992078993"},
+                    {"阜康西中间站", "", "阜康西路墨玉路一秦震舒庭小区对面91569阜康西路中间站", "31.298495822483", "121.162419162326"},
+                    {"锦华五号站", "", "锦江茗园靖远路799弄41号正前方-94855锦华五号站", "31.253284776476", "121.331856282552"},
+                    {"沙河环一号站", "", "金沙江西路沙河路交叉口南侧60米东面广告牌后一74502沙河路一号站", "31.239212510851", "121.332427300347"},
+                    {"澄浏环一号", "", "澄浏路胜竹路交叉路向北200米北口74607澄浏环一号", "31.407358940972", "121.273428276909"},
+                    {"亭茗中心站", "", "绿洲华庭茗苑大门左侧一亭茗中心站-未编号", "31.466056043837", "121.244085286458"}};
 
-            for(String[] data : dataList) {
+            for (String[] data : dataList) {
                 MarketBean marketBean = new MarketBean();
                 marketBean.setLatitude(Double.valueOf(data[3]));
                 marketBean.setLongitude(Double.valueOf(data[4]));
@@ -408,6 +430,10 @@ public class MainActivity extends Activity implements View.OnClickListener, AMap
         }
 
         for (MarketBean marketBean : marketBeans) {
+            if (aMap == null) {
+                aMap = mMapView.getMap();
+                mUiSettings = aMap.getUiSettings();
+            }
             aMap.addMarker(new MarkerOptions()
                     .position(new LatLng(marketBean.getLatitude(),//设置纬度
                             marketBean.getLongitude()))//设置经度

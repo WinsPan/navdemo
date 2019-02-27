@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.test.navdemo">
-    //地图SDK（包含其搜索功能）需要的基础权限
+    <!--//地图SDK（包含其搜索功能）需要的基础权限-->
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -21,7 +21,8 @@
         <meta-data
             android:name="com.amap.api.v2.apikey"
             android:value="af0badcb4ea100b433c0149ca97ecfa8">
-            //开发者申请的key</meta-data>
+            <!--//开发者申请的key-->
+        </meta-data>
 
         <activity
             android:name=".MainActivity"
